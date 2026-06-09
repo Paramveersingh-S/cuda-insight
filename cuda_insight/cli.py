@@ -1,7 +1,10 @@
 import click
+import os
 from rich.console import Console
 from rich.table import Table
 from cuda_insight.utils.gpu_info import get_gpu_info
+from cuda_insight.compiler import compile_cu
+from cuda_insight.ptx_annotator import parse_ptx_and_annotate
 
 @click.group()
 def cli():
@@ -38,6 +41,34 @@ def gpu_info_cmd():
     table.add_row("Peak FP32 TFLOPS", str(info.peak_tflops_fp32))
 
     console.print(table)
+
+@cli.command(name="ptx")
+@click.argument("source_file", type=click.Path(exists=True))
+@click.option("--annotate", is_flag=True, help="Annotate PTX with source lines")
+@click.option("--arch", default="sm_80", help="Target architecture")
+def ptx_cmd(source_file, annotate, arch):
+    """Compile and show PTX."""
+    console = Console()
+    output_dir = "build"
+    try:
+        res = compile_cu(source_file, arch, output_dir)
+    except Exception as e:
+        console.print(f"[bold red]Compile Error:[/bold red] {e}")
+        return
+    
+    if not res.ptx_path or not os.path.exists(res.ptx_path):
+        console.print("[bold red]Error:[/bold red] PTX file not generated.")
+        return
+
+    if annotate:
+        lines = parse_ptx_and_annotate(res.ptx_path, [source_file])
+        for line in lines:
+            if line.source_snippet:
+                console.print(f"[cyan]{line.source_line:4d} | {line.source_snippet}[/cyan]")
+            console.print(f"       {line.ptx_instruction}")
+    else:
+        with open(res.ptx_path, "r", encoding="utf-8") as f:
+            console.print(f.read())
 
 if __name__ == "__main__":
     cli()
