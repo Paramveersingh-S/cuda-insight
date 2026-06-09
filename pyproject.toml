@@ -48,3 +48,9 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
+
+[tool.setuptools.packages.find]
+include = ["cuda_insight*"]
+
+[project.scripts]
+cuda-insight = "cuda_insight.cli:cli"
