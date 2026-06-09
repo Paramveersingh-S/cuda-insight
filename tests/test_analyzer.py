@@ -16,7 +16,7 @@ def test_analyzer():
         "launch__occupancy_theoretical": 100.0,
         "dram__bytes_read.sum": 1e9, # 1 GB
         "dram__bytes_write.sum": 0.5e9, # 0.5 GB
-        "smsp__sass_thread_inst_executed_op_ffma_pred_on.sum": 1e10, # 10 G FMA (20 GFLOPS)
+        "smsp__sass_thread_inst_executed_op_ffma_pred_on.sum": 1e9, # 1 G FMA (2 GFLOPS)
         "l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld": 100,
         "launch__registers_per_thread": 96
     }
