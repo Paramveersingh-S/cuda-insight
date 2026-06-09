@@ -148,7 +148,7 @@ Applying the automated suggestions from CUDA Insight yields massive speedups on 
 
 - Deep Learning Researchers
 - AI Performance Engineers
-- (Add your university/lab here!)
+
 
 ---
 
