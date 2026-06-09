@@ -1,7 +1,3 @@
-<div align="center">
-  <img src="assets/logo.png" alt="CUDA Insight Logo" width="100%">
-</div>
-
 # 🚀 CUDA Insight: Profile, Analyze, Optimize
 
 ![CI](https://github.com/Paramveersingh-S/cuda-insight/actions/workflows/test.yml/badge.svg)
@@ -109,8 +105,10 @@ If you run the naive matmul, CUDA Insight will tell you:
 CUDA Insight automatically generates beautiful roofline charts to visualize your kernel's performance limits.
 
 <div align="center">
-  <img src="assets/roofline.png" alt="Roofline Chart Example" width="600">
+  <img src="assets/roofline_example.png" alt="Roofline Chart Example" width="600">
 </div>
+
+*The roofline model shows whether your kernel is bottlenecked by memory bandwidth (the sloped line) or compute throughput (the horizontal flat line). Notice how the optimized tiled matmul shifts the arithmetic intensity rightwards and reaches higher performance!*
 
 ---
 
@@ -141,6 +139,27 @@ Applying the automated suggestions from CUDA Insight yields massive speedups on 
 | Matrix Multi (4096) | ~1.1 TFLOPS | ~15.2 TFLOPS | **13.8x** | Global Memory Bandwidth |
 | Reduction (10^8) | ~12 GB/s | ~1600 GB/s | **133x** | Atomic Contention -> Warp Shfl |
 | Softmax | 400 GB/s | 1250 GB/s | **3.1x** | Two-pass Global Mem Reads |
+
+<div align="center">
+  <img src="assets/speedups.png" alt="Benchmark Speedup Chart" width="600">
+</div>
+
+---
+
+## 🚨 Troubleshooting
+
+### No profiling data captured (Google Colab)
+If you run `cuda-insight profile` on Google Colab and get an error saying `No profiling data captured`, this is because Colab's hypervisor forcibly blocks hardware performance counters (ERR_NVGPUCTRPERM). 
+**Fix:** You can use our software PyTorch profiler as an alternative:
+```bash
+cuda-insight profile-torch examples/profile_matmul.py
+```
+
+### Invalid NCU Metrics
+If your GPU architecture is older or newer, `ncu` may reject certain metrics requested by the tool. To see the exact error:
+```bash
+ncu --csv --page raw --metrics sm__warps_active.avg.pct_of_peak_sustained_active ./naive_matmul
+```
 
 ---
 
