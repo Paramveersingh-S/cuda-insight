@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/logo.png" alt="CUDA Insight Logo" width="100%">
+</div>
+
 # 🚀 CUDA Insight: Profile, Analyze, Optimize
 
 ![CI](https://github.com/Paramveersingh-S/cuda-insight/actions/workflows/test.yml/badge.svg)
@@ -100,6 +104,13 @@ If you run the naive matmul, CUDA Insight will tell you:
 > **Bottleneck: Memory Bandwidth Bound**  
 > *Kernel is bottlenecked by global memory bandwidth. Utilizing 98% of peak.*  
 > **Fix:** Use shared memory tiling to reduce global memory reads.
+
+### Automated Roofline Charts
+CUDA Insight automatically generates beautiful roofline charts to visualize your kernel's performance limits.
+
+<div align="center">
+  <img src="assets/roofline.png" alt="Roofline Chart Example" width="600">
+</div>
 
 ---
 
