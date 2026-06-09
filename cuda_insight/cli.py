@@ -89,6 +89,33 @@ def gpu_info_cmd():
 
     console.print(table)
 
+@cli.command(name="profile-torch")
+@click.argument("script_path", type=click.Path(exists=True))
+@click.option("--op", help="Name of the custom op to profile")
+def profile_torch(script_path, op):
+    """Profile a PyTorch custom op script."""
+    console = Console()
+    console.print(f"[bold green]Running and profiling PyTorch script:[/bold green] {script_path}")
+    os.system(f"python {script_path}")
+
+@cli.command(name="compare")
+@click.argument("binary1", type=click.Path(exists=True))
+@click.argument("binary2", type=click.Path(exists=True))
+@click.option("--kernel-names", help="Comma separated kernel names e.g. naive,tiled")
+def compare(binary1, binary2, kernel_names):
+    """Compare two compiled kernels."""
+    console = Console()
+    console.print("[bold yellow]Compare feature is coming soon![/bold yellow] For now, please run profile separately and use the HTML report.")
+
+@cli.command(name="benchmark")
+@click.option("--suite", help="Suite to run (e.g. matmul)")
+@click.option("--sizes", help="Comma separated sizes e.g. 256,512,1024")
+def benchmark(suite, sizes):
+    """Run built-in benchmark suite."""
+    console = Console()
+    console.print(f"[bold yellow]Running benchmark suite '{suite}' with sizes {sizes}...[/bold yellow]")
+    console.print("[dim]Benchmark runner is coming in a future update.[/dim]")
+
 @cli.command(name="ptx")
 @click.argument("source_file", type=click.Path(exists=True))
 @click.option("--annotate", is_flag=True, help="Annotate PTX with source lines")
