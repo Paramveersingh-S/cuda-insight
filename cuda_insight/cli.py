@@ -6,15 +6,62 @@ from cuda_insight.utils.gpu_info import get_gpu_info
 from cuda_insight.compiler import compile_cu
 from cuda_insight.ptx_annotator import parse_ptx_and_annotate
 
+from cuda_insight.profiler import profile_kernel
+from cuda_insight.analyzer import analyze
+from cuda_insight.suggestions import get_suggestions
+from cuda_insight.reporter import print_terminal_report, generate_html_report
+from cuda_insight.utils.perf_model import generate_roofline_chart
+
 @click.group()
 def cli():
     """CUDA Kernel Profiling, Debugging & Optimization Toolkit."""
     pass
 
 @cli.command()
-def profile():
-    """Profile a CUDA kernel."""
-    click.echo("Profile command coming soon.")
+@click.argument("binary_path", type=click.Path(exists=True))
+@click.option("--kernel", help="Name of the kernel to profile (optional, runs all if empty)")
+@click.option("--html", is_flag=True, help="Generate an HTML report")
+@click.option("--roofline", is_flag=True, help="Generate a Roofline chart (roofline.png)")
+@click.argument("args", nargs=-1)
+def profile(binary_path, kernel, html, roofline, args):
+    """Profile a CUDA kernel binary."""
+    console = Console()
+    gpu = get_gpu_info()
+    if not gpu:
+        console.print("[bold red]Error:[/bold red] No NVIDIA GPU found, or nvidia-smi/nvcc not in PATH.")
+        return
+
+    with console.status(f"Profiling {binary_path}..."):
+        try:
+            res = profile_kernel(binary_path, kernel, list(args), gpu)
+        except Exception as e:
+            console.print(f"[bold red]Profiling Error:[/bold red] {e}")
+            return
+            
+        if not res.metrics:
+            console.print("[bold red]Error:[/bold red] No profiling data captured. Ensure ncu is installed and you have sufficient permissions.")
+            return
+            
+        report = analyze(res, gpu)
+        suggs = get_suggestions(report)
+        
+    print_terminal_report(report, suggs, console)
+    
+    if html:
+        out_path = f"{kernel or 'report'}_cuda_insight.html"
+        generate_html_report(report, suggs, out_path)
+        console.print(f"[bold green]Saved HTML report to:[/bold green] {out_path}")
+        
+    if roofline:
+        out_path = f"{kernel or 'roofline'}.png"
+        generate_roofline_chart(
+            gpu.peak_tflops_fp32, 
+            gpu.memory_bandwidth_gbps, 
+            report.arithmetic_intensity, 
+            report.achieved_flops, 
+            out_path
+        )
+        console.print(f"[bold green]Saved Roofline chart to:[/bold green] {out_path}")
 
 @cli.command(name="gpu-info")
 def gpu_info_cmd():
