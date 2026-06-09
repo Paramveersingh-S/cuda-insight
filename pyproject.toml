@@ -39,6 +39,9 @@ dev = [
 viz = [
     "matplotlib>=3.7"
 ]
+llm = [
+    "anthropic>=0.3.0"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
